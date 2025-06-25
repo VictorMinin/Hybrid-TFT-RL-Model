@@ -2,16 +2,18 @@ import pandas as pd
 import numpy as np
 from wrappers.time_it import  timeit
 
-
 class GChannelIndicator:
     """
     This class takes a pandas DataFrame with OHLC data and calculates the
-    G-Channel values (Upper, Lower, Middle bands).
+    G-Channel values (Upper, Lower, Middle bands). These values will then be
+    converted into G_Width, Upper_Slope, Middle_Slope, and Lower_Slope.
 
-    The G-Channel indicator is a recently invented indicator, this implementation is based
-    on the original research paper: https://mpra.ub.uni-muenchen.de/95806/1/MPRA_paper_95806.pdf.
+    The G-Channel indicator is a recently invented indicator, this implementation
+    is based on the original research paper:
+    https://mpra.ub.uni-muenchen.de/95806/1/MPRA_paper_95806.pdf.
 
-    It returns a DataFrame with these Upper, Lower, and Middle band values.
+    It returns a DataFrame with these G_Width, Upper_Slope, Middle_Slope, and
+    Lower_Slope columns.
     """
     def __init__(self, channel_period: int = 100):
         """
@@ -43,8 +45,8 @@ class GChannelIndicator:
         df = ohlc_df.copy()
 
         # Initialize calculation buffer columns with NaN
-        df['UpperBuffer'] = np.nan
-        df['LowerBuffer'] = np.nan
+        df['UpperBuffer']  = np.nan
+        df['LowerBuffer']  = np.nan
 
         # Get integer locations for columns
         close_loc = df.columns.get_loc('Close')
@@ -85,7 +87,19 @@ class GChannelIndicator:
                 df.iloc[i, upper_loc] = a_buffer
                 df.iloc[i, lower_loc] = b_buffer
 
+
         # Calculate the Middle Buffer
         df['MiddleBuffer'] = (df['UpperBuffer'] + df['LowerBuffer']) / 2
+
+        # Calculate G_Width
+        df['G_Width'] = df['UpperBuffer'] - df['LowerBuffer']
+
+        # Calculate the slopes (1 bar diff)
+        df['Upper_Slope'] = df['UpperBuffer'].diff()
+        df['Middle_Slope'] = df['MiddleBuffer'].diff()
+        df['Lower_Slope'] = df['LowerBuffer'].diff()
+
+        # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifference vales)
+        df = df.drop(columns=['UpperBuffer', 'LowerBuffer', 'MiddleBuffer'])
 
         return df
