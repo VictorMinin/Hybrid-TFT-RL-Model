@@ -6,13 +6,13 @@ class GChannelIndicator:
     """
     This class takes a pandas DataFrame with OHLC data and calculates the
     G-Channel values (Upper, Lower, Middle bands). These values will then be
-    converted into G_Width, Upper_Slope, Middle_Slope, and Lower_Slope.
+    converted into G_Width, Upper_Slope, Middle_Slope, and Lower_Slope values.
 
     The G-Channel indicator is a recently invented indicator, this implementation
     is based on the original research paper:
     https://mpra.ub.uni-muenchen.de/95806/1/MPRA_paper_95806.pdf.
 
-    It returns a DataFrame with these G_Width, Upper_Slope, Middle_Slope, and
+    It returns a DataFrame with these additional G_Width, Upper_Slope, Middle_Slope, and
     Lower_Slope columns.
     """
     def __init__(self, channel_period: int = 100):
@@ -36,7 +36,7 @@ class GChannelIndicator:
 
 
         Returns:
-            pd.DataFrame: The original DataFrame with additional calculated indicator columns.
+            pd.DataFrame: The DataFrame with newly calculated indicator columns.
         """
         # Ensure the required 'Close' column exists
         if 'Close' not in ohlc_df.columns:
@@ -87,7 +87,6 @@ class GChannelIndicator:
                 df.iloc[i, upper_loc] = a_buffer
                 df.iloc[i, lower_loc] = b_buffer
 
-
         # Calculate the Middle Buffer
         df['MiddleBuffer'] = (df['UpperBuffer'] + df['LowerBuffer']) / 2
 
@@ -99,7 +98,7 @@ class GChannelIndicator:
         df['Middle_Slope'] = df['MiddleBuffer'].diff()
         df['Lower_Slope'] = df['LowerBuffer'].diff()
 
-        # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifference vales)
+        # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifferenced vales)
         df = df.drop(columns=['UpperBuffer', 'LowerBuffer', 'MiddleBuffer'])
 
         return df
