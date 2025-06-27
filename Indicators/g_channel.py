@@ -27,11 +27,12 @@ class GChannelIndicator:
         self.channel_period = channel_period
 
     @timeit
-    def calculate(self, ohlc_df: pd.DataFrame) -> pd.DataFrame:
+    def calculate(self, timeframe: int, ohlc_df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculates the G-Channel indicator values.
 
         Args:
+            timeframe (int): The timeframe which the indicator is being calculated for.
             ohlc_df (pd.DataFrame): DataFrame with 'Open', 'High', 'Low', 'Close' columns.
 
 
@@ -94,9 +95,9 @@ class GChannelIndicator:
         df['G_Width'] = df['UpperBuffer'] - df['LowerBuffer']
 
         # Calculate the slopes (1 bar diff)
-        df['Upper_Slope'] = df['UpperBuffer'].diff()
-        df['Middle_Slope'] = df['MiddleBuffer'].diff()
-        df['Lower_Slope'] = df['LowerBuffer'].diff()
+        df[f'Upper_Slope_{timeframe}'] = df['UpperBuffer'].diff()
+        df[f'Middle_Slope_{timeframe}'] = df['MiddleBuffer'].diff()
+        df[f'Lower_Slope_{timeframe}'] = df['LowerBuffer'].diff()
 
         # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifferenced vales)
         df = df.drop(columns=['UpperBuffer', 'LowerBuffer', 'MiddleBuffer'])

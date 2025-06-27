@@ -62,16 +62,17 @@ class RTrendExhaustion:
             raise ValueError(f"Unsupported smoothing type: {ma_type}")
 
     @timeit
-    def calculate(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate(self, timeframe: int, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculates the %R values based on the input DataFrame.
 
         Args:
             df (pd.DataFrame): A DataFrame with 'high', 'low', 'close' columns
                                and a datetime index.
-
+            timeframe (int): The timeframe which the indicator is being calculated for.
         Returns:
             pd.DataFrame: A DataFrame with the datetime index, 'fast_r', 'slow_r', and 'r_diff' columns.
+
         """
         if not all(col in df.columns for col in ['High', 'Low', self.src_col]):
             raise ValueError(f"Input DataFrame must contain 'High', 'Low', and '{self.src_col}' columns.")
@@ -91,10 +92,10 @@ class RTrendExhaustion:
 
         # Create the output DataFrame
         df_output = pd.DataFrame({
-            'fast_r': s_percent_r,
-            'slow_r': l_percent_r
+            f'fast_r_{timeframe}': s_percent_r,
+            f'slow_r_{timeframe}': l_percent_r
         }, index=df_copy.index) # Use the index of the copied dataframe
 
-        df_output['r_diff'] = df_output['fast_r'] - df_output['slow_r']
+        df_output[f'r_diff_{timeframe}'] = df_output[f'fast_r_{timeframe}'] - df_output['slow_r']
 
         return df_output

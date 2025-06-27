@@ -6,7 +6,7 @@ class JurikDMX:
     """
     A Python implementation of the Jurik DMX Histogram [Loxx] PineScript indicator.
 
-    This class takes IN a pandas DataFrame with OHLC data and calculates the
+    This class takes in a pandas DataFrame with OHLC data and calculates the
     Jurik DMX signal line.
 
     It returns a dataframe with the calculated Jurik DMX signal line.
@@ -106,7 +106,7 @@ class JurikDMX:
         return st['jma1']
 
     @timeit
-    def calculate(self, length=32, phase=0, sig_len=5):
+    def calculate(self, timeframe: int, length=32, phase=0, sig_len=5):
         self._initialize_state()
         high_prev = self.df['High'].shift(1).fillna(self.df['High'])
         low_prev = self.df['Low'].shift(1).fillna(self.df['Low'])
@@ -133,6 +133,6 @@ class JurikDMX:
             signal = self.jurik_filter(trigger, sig_len, phase, key='signal_jma')
             signal_series.append(signal)
         result_df = pd.DataFrame(index=self.df.index)
-        result_df['signal'] = signal_series
-        self.result_df = result_df.copy()
+        result_df[f'dmx_signal_{timeframe}'] = signal_series
+
         return result_df
