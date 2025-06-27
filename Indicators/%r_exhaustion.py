@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_ta as pta
+from wrappers.time_it import timeit
 
 class RTrendExhaustion:
     """
@@ -60,6 +61,7 @@ class RTrendExhaustion:
         else:
             raise ValueError(f"Unsupported smoothing type: {ma_type}")
 
+    @timeit
     def calculate(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculates the %R values based on the input DataFrame.

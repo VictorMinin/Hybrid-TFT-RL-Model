@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from wrappers.time_it import timeit
 
 class JurikDMX:
     """
@@ -104,6 +105,7 @@ class JurikDMX:
         st['jma1'] += st['e2']
         return st['jma1']
 
+    @timeit
     def calculate(self, length=32, phase=0, sig_len=5):
         self._initialize_state()
         high_prev = self.df['High'].shift(1).fillna(self.df['High'])

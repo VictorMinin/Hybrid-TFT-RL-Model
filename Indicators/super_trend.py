@@ -1,5 +1,7 @@
 import pandas as pd
+from wrappers.time_it import timeit
 
+@timeit
 def calculate_supertrend(df_ohlc: pd.DataFrame, atr_period: int = 10, atr_multiplier: float = 3.0) -> pd.DataFrame:
     """
     Calculates the Supertrend indicator, providing separate columns for uptrends and downtrends.
