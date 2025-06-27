@@ -17,9 +17,6 @@ class JurikDMX:
 
         self.df = ohlc_df.copy()
 
-        # Standardize column names to lowercase for consistency
-        self.df.columns = [col.lower() for col in self.df.columns]
-
         required_cols = {'Open', 'High', 'Low', 'Close'}
         if not required_cols.issubset(self.df.columns):
             raise ValueError(f"DataFrame must contain the following columns: {required_cols}")
