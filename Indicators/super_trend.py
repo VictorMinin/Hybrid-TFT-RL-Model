@@ -2,12 +2,13 @@ import pandas as pd
 from wrappers.time_it import timeit
 
 @timeit
-def calculate_supertrend(df_ohlc: pd.DataFrame, atr_period: int = 10, atr_multiplier: float = 3.0) -> pd.DataFrame:
+def calculate_supertrend(df_ohlc: pd.DataFrame, timeframe: int, atr_period: int = 10, atr_multiplier: float = 3.0) -> pd.DataFrame:
     """
     Calculates the Supertrend indicator, providing separate columns for uptrends and downtrends.
 
     Args:
         df_ohlc (pd.DataFrame): DataFrame with 'Open', 'High', 'Low', and 'Close' columns.
+        timeframe (int): The timeframe which the indicator is being calculated for.
         atr_period (int): The period for the ATR calculation. Default is 10.
         atr_multiplier (float): The multiplier for the ATR value. Default is 3.0.
 
@@ -63,11 +64,11 @@ def calculate_supertrend(df_ohlc: pd.DataFrame, atr_period: int = 10, atr_multip
     supertrend_up = [final_low_band[i] if trend[i] == 1 else -1 for i in range(len(df))]
     supertrend_down = [final_up_band[i] if trend[i] == -1 else -1 for i in range(len(df))]
 
-    df['Supertrend_Up'] = supertrend_up
-    df['Supertrend_Down'] = supertrend_down
+    df[f'Supertrend_Up_{timeframe}'] = supertrend_up
+    df[f'Supertrend_Down_{timeframe}'] = supertrend_down
 
     # The first value is always NaN
-    df.at[df.index[0], 'Supertrend_Up'] = float('nan')
-    df.at[df.index[0], 'Supertrend_Down'] = float('nan')
+    df.at[df.index[0], f'Supertrend_Up_{timeframe}'] = float('nan')
+    df.at[df.index[0], f'Supertrend_Down_{timeframe}'] = float('nan')
 
     return df

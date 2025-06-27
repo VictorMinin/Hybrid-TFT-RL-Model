@@ -10,7 +10,7 @@ def calculate_rsi(df: pd.DataFrame, timeframe: int, leng = 14) -> pd.DataFrame:
 
     Parameters:
     df (pd.DataFrame): DataFrame with columns ['High', 'Low', 'Close']
-    time_frame (int): The timeframe of df used for naming of new column
+    timeframe (int): The timeframe of df used for naming of new column
     length (int): The length used in rsi calculation
 
     Returns:
