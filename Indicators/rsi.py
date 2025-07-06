@@ -2,7 +2,6 @@ import pandas_ta as ta
 import pandas as pd
 from wrappers.time_it import timeit
 
-
 @timeit
 def calculate_rsi(df: pd.DataFrame, timeframe: int, leng = 14) -> pd.DataFrame:
     """
