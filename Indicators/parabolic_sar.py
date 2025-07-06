@@ -14,13 +14,13 @@ class ParabolicSAR:
         self.step_af = step_af
 
     @timeit
-    def calculate_psar(self, df: pd.DataFrame):
+    def calculate_psar(self, df: pd.DataFrame, timeframe: int):
         """
     Calculates the Parabolic SAR for a given DataFrame.
 
     Args:
         df (pd.DataFrame): DataFrame with 'High', 'Low', and 'Close' columns.
-
+        timeframe (int): Timeframe for which the indicator is being calculated for.
     Returns:
         pd.DataFrame: The original DataFrame with an added 'PSAR' column.
     """
@@ -90,8 +90,8 @@ class ParabolicSAR:
 
             # Store calculated values
             df_psar.at[i, 'trend'] = trend
-            df_psar.at[i, 'psar'] = psar
+            df_psar.at[i, f'psar_{timeframe}'] = psar
             df_psar.at[i, 'ep'] = ep
             df_psar.at[i, 'af'] = af
 
-        return df_psar[['psar']]
+        return df_psar[[f'psar_{timeframe}']]

@@ -92,7 +92,7 @@ class GChannelIndicator:
         df['MiddleBuffer'] = (df['UpperBuffer'] + df['LowerBuffer']) / 2
 
         # Calculate G_Width
-        df['G_Width'] = df['UpperBuffer'] - df['LowerBuffer']
+        df[f'G_Width_{timeframe}'] = df['UpperBuffer'] - df['LowerBuffer']
 
         # Calculate the slopes (1 bar diff)
         df[f'Upper_Slope_{timeframe}'] = df['UpperBuffer'].diff()

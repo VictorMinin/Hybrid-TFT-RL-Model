@@ -96,6 +96,6 @@ class RTrendExhaustion:
             f'slow_r_{timeframe}': l_percent_r
         }, index=df_copy.index) # Use the index of the copied dataframe
 
-        df_output[f'r_diff_{timeframe}'] = df_output[f'fast_r_{timeframe}'] - df_output['slow_r']
+        df_output[f'r_diff_{timeframe}'] = df_output[f'fast_r_{timeframe}'] - df_output[f'slow_r_{timeframe}']
 
         return df_output

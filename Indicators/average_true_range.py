@@ -12,15 +12,16 @@ class AverageTrueRange:
         self.period = period
 
     @timeit
-    def calculate_atr(self, df: pd.DataFrame):
+    def calculate_atr(self, df: pd.DataFrame, timeframe: int):
         """
         Calculates the Average True Range (ATR) for a given DataFrame.
 
         Args:
             df (pd.DataFrame): DataFrame with 'High', 'Low', and 'Close' columns.
-
+            timeframe (int): Timeframe for which the indicator is being calculated for.
         Returns:
             pd.DataFrame: The original DataFrame with an added 'ATR' column.
+
         """
         # Make a copy to avoid modifying the original DataFrame
         df_atr = df.copy()
@@ -37,6 +38,6 @@ class AverageTrueRange:
         df_atr['true_range'] = df_atr[['tr1', 'tr2', 'tr3']].max(axis=1)
 
         # Calculate the Average True Range (ATR) using a simple moving average (SMA)
-        df_atr['atr'] = df_atr['true_range'].rolling(window=self.period).mean()
+        df_atr[f'atr_{timeframe}'] = df_atr['true_range'].rolling(window=self.period).mean()
 
-        return df_atr[['atr']]
+        return df_atr[[f'atr_{timeframe}']]
