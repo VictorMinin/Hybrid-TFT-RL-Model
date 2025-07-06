@@ -1,11 +1,11 @@
 import pandas as pd
 
-class Parabolic_SAR:
+class ParabolicSAR:
     """
      This class takes in a pandas DataFrame with OHLC data and calculates the
      Parabolic SAR values for the given indicator settings.
 
-    It returns a dataframe with the calculated Parabolic SAR values.
+     It returns a dataframe with the calculated Parabolic SAR values.
     """
     def __init__(self, initial_af=0.02, max_af=0.2, step_af=0.02):
         self.initial_af = initial_af
