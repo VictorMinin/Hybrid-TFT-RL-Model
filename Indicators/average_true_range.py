@@ -1,4 +1,5 @@
 import pandas as pd
+from wrappers.time_it import timeit
 
 class AverageTrueRange:
     """
@@ -10,6 +11,7 @@ class AverageTrueRange:
     def __init__(self, period=14):
         self.period = period
 
+    @timeit
     def calculate_atr(self, df: pd.DataFrame):
         """
         Calculates the Average True Range (ATR) for a given DataFrame.

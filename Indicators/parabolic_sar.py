@@ -1,4 +1,5 @@
 import pandas as pd
+from wrappers.time_it import timeit
 
 class ParabolicSAR:
     """
@@ -12,6 +13,7 @@ class ParabolicSAR:
         self.max_af = max_af
         self.step_af = step_af
 
+    @timeit
     def calculate_psar(self, df: pd.DataFrame):
         """
     Calculates the Parabolic SAR for a given DataFrame.

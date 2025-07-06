@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
+from wrappers.time_it import timeit
 
 def calculate_holidays(year):
     """
@@ -49,6 +50,7 @@ def calculate_thanksgiving(year):
     """Calculate Thanksgiving Day (fourth Thursday of November)."""
     return pd.Timestamp(f"{year}-11-01") + pd.DateOffset(weekday=3, weeks=3)
 
+@timeit
 def create_time_features(df):
     df['Time'] = df['Time'].apply(pd.to_datetime, errors='coerce', utc=True)
     df['time_idx'] = ((df['Time'] - df['Time'].min()).dt.total_seconds() // (15 * 60)).astype(int)
