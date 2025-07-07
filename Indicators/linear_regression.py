@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from wrappers.time_it import timeit
 
 class LinearRegressionSlopeCalculator:
     """
@@ -18,6 +19,7 @@ class LinearRegressionSlopeCalculator:
             raise ValueError("Input DataFrame must contain a 'Close' column.")
         self.df = df.copy()
 
+    @timeit
     def calculate(self, timeframe: int, period: int = 20):
         """
         Calculates the linear regression slope over a rolling window.
