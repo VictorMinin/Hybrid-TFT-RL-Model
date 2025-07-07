@@ -6,13 +6,13 @@ class GChannelIndicator:
     """
     This class takes a pandas DataFrame with OHLC data and calculates the
     G-Channel values (Upper, Lower, Middle bands). These values will then be
-    converted into G_Width, Upper_Slope, Middle_Slope, and Lower_Slope values.
+    converted into G%, G_Width, Upper_Slope, Middle_Slope, and Lower_Slope values.
 
     The G-Channel indicator is a recently invented indicator, this implementation
     is based on the original research paper:
     https://mpra.ub.uni-muenchen.de/95806/1/MPRA_paper_95806.pdf.
 
-    It returns a DataFrame with these additional G_Width, Upper_Slope, Middle_Slope, and
+    It returns a DataFrame with these additional G%, G_Width, Upper_Slope, Middle_Slope, and
     Lower_Slope columns.
     """
     def __init__(self, channel_period: int = 100):
@@ -98,6 +98,20 @@ class GChannelIndicator:
         df[f'Upper_Slope_{timeframe}'] = df['UpperBuffer'].diff()
         df[f'Middle_Slope_{timeframe}'] = df['MiddleBuffer'].diff()
         df[f'Lower_Slope_{timeframe}'] = df['LowerBuffer'].diff()
+        # Calculate G%
+        df[f'G%_{timeframe}'] = np.nan # Initialize with NaN
+
+        # Prices above Middle Band
+        # When price is at UpperBand, (UpperBand - MiddleBand) / (UpperBand - MiddleBand) = 1
+        # When price is at MiddleBand, (MiddleBand - MiddleBand) / (UpperBand - MiddleBand) = 0
+        upper_half_mask = df['Close'] >= df['MiddleBuffer']
+        df.loc[upper_half_mask, f'G%_{timeframe}'] = (df['Close'] - df['MiddleBuffer']) / (df['UpperBuffer'] - df['MiddleBuffer'])
+
+        # Prices below Middle Band
+        # When price is at MiddleBand, (MiddleBand - MiddleBand) / (MiddleBand - LowerBand) = 0
+        # When price is at LowerBand, (LowerBand - MiddleBand) / (MiddleBand - LowerBand) = -1
+        lower_half_mask = df['Close'] < df['MiddleBuffer']
+        df.loc[lower_half_mask, f'G%_{timeframe}'] = (df['Close'] - df['MiddleBuffer']) / (df['MiddleBuffer'] - df['LowerBuffer'])
 
         # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifferenced vales)
         df = df.drop(columns=['UpperBuffer', 'LowerBuffer', 'MiddleBuffer'])
