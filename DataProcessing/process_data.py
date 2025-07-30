@@ -1,13 +1,14 @@
 import os
 from typing import Dict
 import pandas as pd
-from jurik_ma import calculate_jurik_filter
-from g_channel import GChannelIndicator
-from average_true_range import AverageTrueRange
-from stoch import calculate_stochastic_oscillator
-from rsi import calculate_rsi
+from Indicators.jurik_ma import calculate_jurik_filter
+from Indicators.g_channel import GChannelIndicator
+from Indicators.average_true_range import AverageTrueRange
+from Indicators.stoch import calculate_stochastic_oscillator
+from Indicators.rsi import calculate_rsi
+from Indicators.r_exhaustion import RTrendExhaustion
+from Indicators.jurik_dmx import JurikDMX
 from DataProcessing.normalize_features import normalize_features
-from r_exhaustion import RTrendExhaustion
 from wrappers.time_it import timeit
 
 @timeit
@@ -50,8 +51,8 @@ def process_data(prediction_time_frame: int) -> pd.DataFrame:
 
     timeframes = (1, 5, 15, 30, 60, 240)
     eurusd_dfs = {}
-    raw_data_path = "C:/Users/victo/IdeaProjects/Hybrid-TFT-RL-Model-/data/raw"
-    processed_data_path = "C:/Users/victo/IdeaProjects/Hybrid-TFT-RL-Model-/data/processed"
+    raw_data_path = "/data/raw"
+    processed_data_path = "/data/processed"
     os.chdir(raw_data_path)
     g_channel = GChannelIndicator()
     atr = AverageTrueRange()
@@ -69,6 +70,8 @@ def process_data(prediction_time_frame: int) -> pd.DataFrame:
         df = calculate_stochastic_oscillator(df, tf)
         df = atr.calculate_atr(df, tf)
         df = r_exhaustion.calculate(df,tf)
+        jurik_dmx = JurikDMX(df)
+        df = jurik_dmx.calculate(tf)
         df = calculate_jurik_filter(df, tf)
         df.drop(columns=['Open', 'High', 'Low'], inplace=True)
         print(type(df))
