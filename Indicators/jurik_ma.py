@@ -3,7 +3,7 @@ import numpy as np
 from wrappers.time_it import timeit
 
 @timeit
-def calculate_jurik_filter(df: pd.DataFrame, timeframe: int, src_column='Close', len_param=15, phase=0, filter_param=0, double_smooth=False) -> pd.Series:
+def calculate_jurik_filter(df: pd.DataFrame, timeframe: int, src_column='Close', len_param=15, phase=0, filter_param=0, double_smooth=False) -> pd.DataFrame:
     """
     Calculates the slope of the Jurik Moving Average (JMA).
 
@@ -100,6 +100,7 @@ def calculate_jurik_filter(df: pd.DataFrame, timeframe: int, src_column='Close',
 
     # We shall calculate the slope of the MA to ensure all of our indicators are differenced
     jma_slope = jma.diff()
-    jma_slope.name = f"jma_slope_{timeframe}"
+    jma_slope_col_name = f"jma_slope_{timeframe}"
+    df[jma_slope_col_name] = jma_slope
 
-    return jma_slope
+    return df
