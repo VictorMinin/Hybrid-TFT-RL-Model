@@ -39,6 +39,6 @@ class AverageTrueRange:
 
         # Calculate the Average True Range (ATR) using a simple moving average (SMA)
         df_atr[f'atr_{timeframe}'] = df_atr['true_range'].rolling(window=self.period).mean()
-        df_atr.drop(columns=['true_range', 'tr1', 'tr2', 'tr3', 'previous_close'])
+        df_atr.drop(columns=['true_range', 'tr1', 'tr2', 'tr3', 'previous_close'], inplace=True)
 
         return df_atr
