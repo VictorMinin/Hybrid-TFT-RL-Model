@@ -27,7 +27,7 @@ class GChannelIndicator:
         self.channel_period = channel_period
 
     @timeit
-    def calculate(self, timeframe: int, ohlc_df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_g_channel(self, ohlc_df: pd.DataFrame, timeframe: int) -> pd.DataFrame:
         """
         Calculates the G-Channel indicator values.
 
