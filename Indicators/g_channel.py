@@ -1,6 +1,32 @@
 import pandas as pd
 import numpy as np
+from numba import njit
 from wrappers.time_it import  timeit
+
+@njit
+def optimized_computation(close: pd.Series, channel_period: int):
+    n = len(close)
+    upper = np.empty(n)
+    lower = np.empty(n)
+    upper[0] = close[0]
+    lower[0] = close[0]
+
+    for i in range(1,n):
+        src = close[i]
+        prev_upper = upper[i-1]
+        prev_lower = lower[i-1]
+
+        if src > prev_upper:
+            upper[i] = src
+        else:
+            upper[i] = prev_upper - (prev_upper - prev_lower) / channel_period
+
+        if src < prev_lower:
+            lower[i] = src
+        else:
+            lower[i] = prev_lower + (prev_upper - prev_lower) / channel_period
+
+    return upper, lower
 
 class GChannelIndicator:
     """
@@ -44,74 +70,40 @@ class GChannelIndicator:
             raise ValueError("DataFrame must contain a 'Close' column.")
 
         df = ohlc_df.copy()
+        close = df['Close'].values.astype(np.float64)
 
-        # Initialize calculation buffer columns with NaN
-        df['UpperBuffer']  = np.nan
-        df['LowerBuffer']  = np.nan
+        upper, lower = optimized_computation(close, self.channel_period)
 
-        # Get integer locations for columns
-        close_loc = df.columns.get_loc('Close')
-        upper_loc = df.columns.get_loc('UpperBuffer')
-        lower_loc = df.columns.get_loc('LowerBuffer')
-
-        # Iteratively calculate the G-Channel using .iloc
-        for i in range(len(df)):
-            src = df.iloc[i, close_loc]
-
-            if i == 0:
-                # Initialize first bar values
-                df.iloc[i, upper_loc] = src
-                df.iloc[i, lower_loc] = src
-            else:
-                # Get previous buffer values
-                prev_a_buffer = df.iloc[i-1, upper_loc]
-                prev_b_buffer = df.iloc[i-1, lower_loc]
-
-                # Calculate current aBuffer (Upper)
-                if src > prev_a_buffer:
-                    a_buffer = src
-                else:
-                    if self.channel_period > 0:
-                        a_buffer = prev_a_buffer - (prev_a_buffer - prev_b_buffer) / self.channel_period
-                    else:
-                        a_buffer = prev_a_buffer
-
-                # Calculate current bBuffer (Lower)
-                if src < prev_b_buffer:
-                    b_buffer = src
-                else:
-                    if self.channel_period > 0:
-                        b_buffer = prev_b_buffer + (prev_a_buffer - prev_b_buffer) / self.channel_period
-                    else:
-                        b_buffer = prev_b_buffer
-
-                df.iloc[i, upper_loc] = a_buffer
-                df.iloc[i, lower_loc] = b_buffer
-
+        # Assign results
+        df['UpperBuffer']  = upper
+        df['LowerBuffer']  = lower
         # Calculate the Middle Buffer
         df['MiddleBuffer'] = (df['UpperBuffer'] + df['LowerBuffer']) / 2
 
         # Calculate G_Width
         df[f'G_Width_{timeframe}'] = df['UpperBuffer'] - df['LowerBuffer']
 
-        # Calculate the slopes (1 bar diff)
-        df[f'Upper_Slope_{timeframe}'] = df['UpperBuffer'].diff()
-        df[f'Middle_Slope_{timeframe}'] = df['MiddleBuffer'].diff()
-        df[f'Lower_Slope_{timeframe}'] = df['LowerBuffer'].diff()
-        # Calculate G%
-        df[f'G%_{timeframe}'] = np.nan # Initialize with NaN
+        df[f'G_Width_{timeframe}'] = upper - lower
+        df[f'Upper_Slope_{timeframe}'] = np.diff(np.insert(upper, 0, np.nan))
+        df[f'Middle_Slope_{timeframe}'] = np.diff(np.insert((upper + lower) / 2, 0, np.nan))
+        df[f'Lower_Slope_{timeframe}'] = np.diff(np.insert(lower, 0, np.nan))
 
+        # G% calculation
+        g_percent = np.full(len(close), np.nan)
+
+        middle = df['MiddleBuffer'].values
         # Prices above Middle Band
         # When price is at UpperBand, (UpperBand - MiddleBand) / (UpperBand - MiddleBand) = 1
         # When price is at MiddleBand, (MiddleBand - MiddleBand) / (UpperBand - MiddleBand) = 0
-        upper_half_mask = df['Close'] >= df['MiddleBuffer']
-        df.loc[upper_half_mask, f'G%_{timeframe}'] = (df['Close'] - df['MiddleBuffer']) / (df['UpperBuffer'] - df['MiddleBuffer'])
-
+        upper_mask = close >= middle
         # Prices below Middle Band
         # When price is at MiddleBand, (MiddleBand - MiddleBand) / (MiddleBand - LowerBand) = 0
         # When price is at LowerBand, (LowerBand - MiddleBand) / (MiddleBand - LowerBand) = -1
-        lower_half_mask = df['Close'] < df['MiddleBuffer']
-        df.loc[lower_half_mask, f'G%_{timeframe}'] = (df['Close'] - df['MiddleBuffer']) / (df['MiddleBuffer'] - df['LowerBuffer'])
+        lower_mask = close < middle
+
+        g_percent[upper_mask] = (close[upper_mask] - middle[upper_mask]) / (upper[upper_mask] - middle[upper_mask])
+        g_percent[lower_mask] = (close[lower_mask] - middle[lower_mask]) / (middle[lower_mask] - lower[lower_mask])
+        df[f'G%_{timeframe}'] = g_percent
 
         # Drop the unnecessary columns (due to differencing of timeseries, we don't want undifferenced vales)
         df = df.drop(columns=['UpperBuffer', 'LowerBuffer', 'MiddleBuffer'])
