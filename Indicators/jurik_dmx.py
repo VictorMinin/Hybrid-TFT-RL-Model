@@ -106,7 +106,7 @@ class JurikDMX:
         return st['jma1']
 
     @timeit
-    def calculate(self, timeframe: int, length=32, phase=0, sig_len=5):
+    def calculate(self, timeframe: int, length=32, phase=0, sig_len=5) -> pd.DataFrame:
         self._initialize_state()
         high_prev = self.df['High'].shift(1).fillna(self.df['High'])
         low_prev = self.df['Low'].shift(1).fillna(self.df['Low'])
