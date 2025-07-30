@@ -29,14 +29,14 @@ class RTrendExhaustion:
             long_smoothing_length (int): The smoothing period for the slow %R.
             smooth_type (str): The type of moving average for smoothing.
                               Supports 'sma', 'ema', 'hma', 'rma', and 'wma'.
-            src (str): The source price series to use ('close', 'high', etc.).
+            src (str): The source price series to use ('Close').
         """
         self.short_length = short_length
         self.short_smoothing_length = short_smoothing_length
         self.long_length = long_length
         self.long_smoothing_length = long_smoothing_length
         self.smooth_type = smooth_type.lower()
-        self.src_col = src.lower()
+        self.src_col = src
 
     def get_ma(self, series: pd.Series, length: int, ma_type: str, volume: pd.Series = None) -> pd.Series:
         """
@@ -62,7 +62,7 @@ class RTrendExhaustion:
             raise ValueError(f"Unsupported smoothing type: {ma_type}")
 
     @timeit
-    def calculate(self, timeframe: int, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate(self, df: pd.DataFrame, timeframe: int) -> pd.DataFrame:
         """
         Calculates the %R values based on the input DataFrame.
 
@@ -90,12 +90,8 @@ class RTrendExhaustion:
         if self.long_smoothing_length > 1:
             l_percent_r = self.get_ma(l_percent_r, self.long_smoothing_length, self.smooth_type)
 
-        # Create the output DataFrame
-        df_output = pd.DataFrame({
-            f'fast_r_{timeframe}': s_percent_r,
-            f'slow_r_{timeframe}': l_percent_r
-        }, index=df_copy.index) # Use the index of the copied dataframe
+        df[f'fast_r_{timeframe}'] = s_percent_r
+        df[f'slow_r_{timeframe}'] = l_percent_r
+        df[f'r_diff_{timeframe}'] = df[f'fast_r_{timeframe}'] - df[f'slow_r_{timeframe}']
 
-        df_output[f'r_diff_{timeframe}'] = df_output[f'fast_r_{timeframe}'] - df_output[f'slow_r_{timeframe}']
-
-        return df_output
+        return df
