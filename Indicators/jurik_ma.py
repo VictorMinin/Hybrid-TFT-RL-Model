@@ -35,7 +35,6 @@ def numba_jma_calculation(src: np.array, length: int, phase: int, volty_10: np.a
     bsmin_prev = src[0]
     avolty_prev = 0
     vsum_prev = 0
-
     jma_result = np.zeros(len(src))
 
     for i in range(len(src)):
