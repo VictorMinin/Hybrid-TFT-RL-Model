@@ -4,6 +4,7 @@ import pandas as pd
 from Indicators.jurik_ma import calculate_jurik_filter
 from Indicators.g_channel import GChannelIndicator
 from Indicators.average_true_range import AverageTrueRange
+from Indicators.linear_regression import LinearRegressionSlopeCalculator
 from Indicators.stoch import calculate_stochastic_oscillator
 from Indicators.rsi import calculate_rsi
 from Indicators.r_exhaustion import RTrendExhaustion
@@ -72,6 +73,10 @@ def process_data(prediction_time_frame: int) -> pd.DataFrame:
         df = r_exhaustion.calculate(df,tf)
         df = calculate_dmx_numba(df, tf)
         df = calculate_jurik_filter(df, tf)
+        linear_regression = LinearRegressionSlopeCalculator(df)
+        df = linear_regression.calculate(tf)
+        linear_regression = LinearRegressionSlopeCalculator(df)
+        df = linear_regression.calculate(tf, 100)
         df.drop(columns=['Open', 'High', 'Low'], inplace=True)
         if tf != prediction_time_frame:
             df.drop(columns=['Close'], inplace=True)
@@ -81,8 +86,7 @@ def process_data(prediction_time_frame: int) -> pd.DataFrame:
     os.chdir(processed_data_path)
     eurusd_df = truncate(eurusd_df)
     eurusd_df.to_csv("X.csv")
-    normalized_eurusd_df = normalize_features(eurusd_df)
-    normalized_eurusd_df.to_csv("X_normalized.csv")
+    normalize_features(eurusd_df)
 
     return eurusd_df
 
