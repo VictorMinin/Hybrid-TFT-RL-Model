@@ -52,6 +52,6 @@ class LinearRegressionSlopeCalculator:
 
             # --- Store the calculated slope ---
             current_index = self.df.index[i]
-            self.df.loc[current_index, f'lr_slope_{timeframe}'] = slope
+            self.df.loc[current_index, f'lr_slope_{timeframe}_length{period}'] = slope
 
         return self.df
