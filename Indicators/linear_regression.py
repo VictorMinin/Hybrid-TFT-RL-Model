@@ -1,6 +1,35 @@
 import pandas as pd
 import numpy as np
 from wrappers.time_it import timeit
+import numba
+
+@numba.jit(nopython=True)
+def optimized_linreg_calculation(prices, output_array, period):
+    sum_x = 0.0
+    sum_x_squared = 0.0
+    for n in range(period):
+        sum_x += n
+        sum_x_squared += n * n
+    denominator = period * sum_x_squared - sum_x * sum_x
+
+    if denominator == 0:
+        return # Exit early if we divide by 0
+
+    for i in range(period - 1, len(prices)):
+        y_window = prices[i - period + 1 : i + 1]
+
+        sum_y = 0.0
+        sum_xy = 0.0
+
+        for j in range(period):
+            sum_y += y_window[j]
+            sum_xy += j * y_window[j]
+
+        #    Formula: N * Σ(xy) - Σx * Σy
+        numerator = period * sum_xy - sum_x * sum_y
+        slope = numerator / denominator
+        output_array[i] = slope
+    return output_array
 
 class LinearRegressionSlopeCalculator:
     """
@@ -32,26 +61,14 @@ class LinearRegressionSlopeCalculator:
             pd.DataFrame: The original DataFrame with an added 'lr_slope' column.
 
         """
-        # Initialize the new column with NaN
-        self.df[f'lr_slope_{timeframe}'] = np.nan
+        close_prices = self.df['Close'].to_numpy()
+        output_slopes = np.full(len(self.df), np.nan)
 
         # Create the independent variable (time sequence)
         x = np.arange(period)
+        output_slopes = optimized_linreg_calculation(close_prices, output_slopes, period)
 
-        # Loop through the dataframe to calculate the rolling regression slope
-        for i in range(period - 1, len(self.df)):
-            # Get the data for the current window
-            window_slice = self.df.iloc[i - period + 1 : i + 1]
-
-            # Use 'Close' price for the regression calculation
-            y = window_slice['Close'].values
-
-            # --- Perform Linear Regression to get the slope ---
-            # np.polyfit returns [slope, intercept]
-            slope, _ = np.polyfit(x, y, 1)
-
-            # --- Store the calculated slope ---
-            current_index = self.df.index[i]
-            self.df.loc[current_index, f'lr_slope_{timeframe}_length{period}'] = slope
+        column_name = f'lr_slope_{timeframe}_length_{period}'
+        self.df[column_name] = output_slopes
 
         return self.df
