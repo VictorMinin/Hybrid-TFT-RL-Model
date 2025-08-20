@@ -23,7 +23,9 @@ def normalize_features(eurusd_df: pd.DataFrame):
         ("slow_r_1", "slow_r_5", "slow_r_15", "slow_r_30", "slow_r_60", "slow_r_240") : "StandardScaler",
         ("r_diff_1", "r_diff_5", "r_diff_15", "r_diff_30", "r_diff_60", "r_diff_240") : "StandardScaler",
         ("dmx_signal_1", "dmx_signal_5", "dmx_signal_15", "dmx_signal_30", "dmx_signal_60", "dmx_signal_240") : "PowerTransformer",
-        ("jma_slope_1", "jma_slope_5", "jma_slope_15", "jma_slope_30", "jma_slope_60", "jma_slope_240") : "RobustScaler"
+        ("jma_slope_1", "jma_slope_5", "jma_slope_15", "jma_slope_30", "jma_slope_60", "jma_slope_240") : "RobustScaler",
+        ("lr_slope_1_length_100", "lr_slope_5_length_100", "lr_slope_15_length_100", "lr_slope_30_length_100", "lr_slope_60_length_100", "lr_slope_240_length_100", ) : "RobustScaler",
+        ("lr_slope_1_length_20", "lr_slope_5_length_20", "lr_slope_15_length_20", "lr_slope_30_length_20", "lr_slope_60_length_20", "lr_slope_240_length_20", ) : "RobustScaler"
     }
 
     for column_tuple, scaler_name in scaling_dict.items():
